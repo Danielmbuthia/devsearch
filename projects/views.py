@@ -2,6 +2,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from projects.forms import ProjectForm
 from projects.models import Project
+from django.contrib import messages
 
 # Create your views here.
 
@@ -25,7 +26,9 @@ def create_project(request):
     if request.method == "POST":
         form = ProjectForm(request.POST,request.FILES) 
         if form.is_valid():
-            form.save()
+            project = form.save(commit=False)
+            project.owner = request.user.profile # logged in user
+            project.save()
             return redirect("projects:projects")
     context ={
         "form":form
@@ -34,7 +37,8 @@ def create_project(request):
 
 @login_required(login_url='users:login')
 def update_project(request,pk):
-    project = Project.objects.get(id=pk)
+    profile = request.user.profile
+    project = profile.project_set.get(id=pk)
     form = ProjectForm(instance=project)
     if request.method == "POST":
         form = ProjectForm(request.POST,request.FILES,instance=project) 
@@ -49,12 +53,14 @@ def update_project(request,pk):
 
 @login_required(login_url='users:login')
 def delete_project(request,pk):
-    project = Project.objects.get(pk=pk)
+    profile = request.user.profile
+    project = profile.project_set.get(id=pk)
     if request.method == 'POST':
         project.delete()
+        messages.success(request,'project deleted succesfully')
         return redirect('projects:projects')
     context ={
-        object:project
+        'object':project
     }
     return render(request,'projects/delete_template.html',context)
         

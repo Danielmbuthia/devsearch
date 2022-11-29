@@ -3,8 +3,8 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import login,authenticate,logout
 from django.contrib.auth.decorators import login_required
-from users.forms import CustomUserCreationForm, UpdateProfileForm
-from users.models import Profile
+from users.forms import CustomUserCreationForm, SkillForm, UpdateProfileForm
+from users.models import Profile, Skill
 
 # Create your views here.
 def login_user(request):
@@ -89,6 +89,7 @@ def user_account(request):
     }
    return render(request,'users/account.html',context)
 
+@login_required(login_url='users:login') 
 def update_account(request):
    profile = request.user.profile 
    form = UpdateProfileForm(instance=profile)
@@ -102,3 +103,55 @@ def update_account(request):
       'form':form
    }
    return render(request,'users/profile_form.html',context)
+
+@login_required(login_url='users:login') 
+def create_skill(request):
+   form = SkillForm()
+   profile = request.user.profile 
+   if request.method == 'POST':
+      form = SkillForm(request.POST)
+      # name = request.POST['name']
+      # skill_exist = Skill.objects.get(name__contains=name)
+      # if skill_exist:
+      #    messages.error(request,'Skill exists')
+      #    return redirect('users:create_skill')
+      if form.is_valid():
+         skill = form.save(commit=False)
+         skill.owner =profile
+         skill.save()
+         messages.success(request,'Skill added successfully')
+         return redirect('users:account')
+   context ={
+      'form':form
+   }
+   return render(request,'users/skill_form.html',context)
+
+
+@login_required(login_url='users:login') 
+def update_skill(request,pk):
+   profile = request.user.profile 
+   skill = profile.skill_set.get(pk=pk)
+   form = SkillForm(instance=skill)
+   if request.method == 'POST':
+      form = SkillForm(request.POST,instance=skill)
+      if form.is_valid():
+         form.save()
+         messages.success(request,'Skill edited successfully')
+         return redirect('users:account')
+   context ={
+      'form':form
+   }
+   return render(request,'users/skill_form.html',context)
+
+@login_required(login_url='users:login') 
+def delete_skill(request,pk):
+   profile = request.user.profile 
+   skill = profile.skill_set.get(pk=pk)
+   if request.method == 'POST':
+      skill.delete()
+      messages.success(request,'skill deleted succesfully')
+      return redirect('users:account')
+   context ={
+      'object':skill
+   }
+   return render(request,'projects/delete_template.html',context)
