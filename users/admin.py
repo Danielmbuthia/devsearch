@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from users.models import Profile,Skill
+from users.models import Message, Profile,Skill
 # Register your models here.
 
 class ProfileAdmin(admin.ModelAdmin):
@@ -13,5 +13,10 @@ class ProfileAdmin(admin.ModelAdmin):
     list_display_links = ['username']
     search_fields= ['username','email']
     list_filter= ['username']
+    
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ('subject','name','email','receiver')
+    
 admin.site.register(Profile,ProfileAdmin)
 admin.site.register(Skill)
+admin.site.register(Message,MessageAdmin)
