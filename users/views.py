@@ -15,7 +15,7 @@ def login_user(request):
    if request.user.is_authenticated:
       return redirect('users:profiles')
    if request.method == 'POST':
-      username = request.POST['username']
+      username = request.POST['username'].lower()
       password = request.POST['password']
       try:
          user = User.objects.get(username=username)
@@ -25,7 +25,7 @@ def login_user(request):
       user = authenticate(request,username=username,password=password)
       if user is not None:
          login(request,user)
-         return redirect('users:profiles')
+         return redirect(request.GET['next'] if 'next' in request.GET else 'users:account')
       else:
          messages.error(request,'Username or password is incorect')
          return redirect('users:login') 

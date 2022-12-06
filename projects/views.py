@@ -1,6 +1,7 @@
+from django.db import IntegrityError
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
-from projects.forms import ProjectForm
+from projects.forms import ProjectForm, ReviewForm
 from projects.models import Project
 
 from django.contrib import messages
@@ -22,8 +23,27 @@ def projects(request):
 
 def project(request,pk):
     project = Project.objects.get(id=pk)
+    form = ReviewForm()
+    if request.method == 'POST':
+        try:
+            form = ReviewForm(request.POST)
+            if form.is_valid():
+                review = form.save(commit=False)
+                review.owner = request.user.profile
+                review.project = project
+                review.save()
+                
+                project.get_vote_count
+                
+                messages.info(request,'Your review saved successfully')
+                return redirect('projects:project',pk=project.id)
+        except IntegrityError:
+            messages.error(request,'You have arleady reviewed this project')
+            return redirect('projects:project',pk=project.id)
+            
     context ={
-        'projectObj':project
+        'projectObj':project,
+        'form':form
     }
     return render(request,'projects/project_view.html',context)
 

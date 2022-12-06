@@ -8,7 +8,11 @@ class ProjectAdmin(admin.ModelAdmin):
     list_display_links = ['title']
     search_fields= ['title']
     list_filter= ['title']
+    
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ('value','owner')
+    
 
 admin.site.register(Project,ProjectAdmin)
-admin.site.register(Review)
+admin.site.register(Review,ReviewAdmin)
 admin.site.register(Tag)
