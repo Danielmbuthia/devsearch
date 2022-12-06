@@ -7,7 +7,7 @@ from users.forms import CustomUserCreationForm, SkillForm, UpdateProfileForm
 from users.models import Profile, Skill
 from django.db.models import Q
 
-from users.utils import profiles_search
+from users.utils import profiles_paginator, profiles_search
 
 # Create your views here.
 def login_user(request):
@@ -64,9 +64,11 @@ def register_user(request):
 
 def profiles(request):
    search_text, profiles = profiles_search(request) 
+   custom_range,profiles = profiles_paginator(request,profiles,6)
    context ={
     'profiles':profiles,
-    'search_text':search_text 
+    'search_text':search_text ,
+    'custom_range':custom_range
    }
    return render(request,'users/profiles.html',context)
 

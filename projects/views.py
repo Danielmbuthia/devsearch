@@ -1,18 +1,22 @@
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from projects.forms import ProjectForm
-from projects.models import Project, Tag
+from projects.models import Project
+
 from django.contrib import messages
 
-from projects.utils import project_search
+from projects.utils import project_paginator, project_search
 
 # Create your views here.
 
 def projects(request):
     search_text, projects = project_search(request)
+    custom_range,projects = project_paginator(request,projects,6)
+  
     context ={
         'projects':projects,
-        'search_text':search_text
+        'search_text':search_text,
+        'custom_range':custom_range
     }
     return render(request,'projects/projects.html',context)
 
